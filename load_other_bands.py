@@ -1,5 +1,5 @@
 from showtime_get_bands import Pitchfork_charts, KCRW_harvest, \
-    KEXP_charts, KEXP_harvest, metacritic, sgum, pfork_tracks, \
+    KEXP_charts, metacritic, sgum, pfork_tracks, \
     MTM
 from utilities import cleandb, cleanup, shredTTOTMs
 import datetime as dt
@@ -21,8 +21,14 @@ def load_other_bands(Session):
     session = Session()
     today = dt.date.today()
     for src in bandsources:
-        print(src)
-        list = grabbands(src)
+        print('\n\n\n', src)
+        try:
+            list = grabbands(src)
+        except Exception as e:
+            print (str(e))
+            print ('Couldnt do {0}'.format(src))
+            list = []
+
         for i in list:
             h = cleanup(i.name)
             if h != '':
@@ -38,6 +44,7 @@ def load_other_bands(Session):
                         session.commit()
                 except Exception as e:
                     print(str(e))
+
     cleandb(Session)
     a = shredTTOTMs(Session)
     print(('Deleted {0} TTOTM bands'.format(a)))

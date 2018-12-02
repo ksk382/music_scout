@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from build_database import db, band
 from gmusicapi import Mobileclient
 from difflib import SequenceMatcher
+import os
 
 
 def get_creds():

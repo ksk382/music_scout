@@ -139,6 +139,9 @@ def MTM(maxbands):
         if j not in c:
             c.append(j)
 
+    for i in c[:maxbands]:
+        print (i.name, i.song)
+
     return c[:maxbands]
 
 
@@ -306,4 +309,4 @@ def KCRW_harvest(maxbands):
 
 if __name__ == "__main__":
 
-    KEXP_charts(100)
+    MTM(100)

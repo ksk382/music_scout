@@ -1,8 +1,3 @@
-from showtime_get_bands import Pitchfork_charts, KCRW_harvest, \
-    KEXP_charts, KEXP_harvest, metacritic, sgum, pfork_tracks, \
-    MTM
-from utilities import cleandb, cleanup, shredTTOTMs
-import datetime as dt
 import socket
 from sqlalchemy import MetaData
 from sqlalchemy import create_engine

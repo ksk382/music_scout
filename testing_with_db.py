@@ -3,7 +3,7 @@ from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from build_database import db, band
-
+from utilities import shredTTOTMs
 
 if __name__ == "__main__":
 
@@ -19,4 +19,11 @@ if __name__ == "__main__":
     session = Session()
 
     a = session.query(band)
+    print (a.count())
+    b = shredTTOTMs(Session)
+    print ('{0} removed'.format(b))
+    a = session.query(band)
+    print (a.count())
+
+
 
