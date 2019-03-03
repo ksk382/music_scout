@@ -3,22 +3,32 @@ from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from build_database import db, band
-from send_it import send_it, get_ids
+from send_it import send_it, send_it_top90, get_ids
+from sqlalchemy.sql.expression import func
 
-
-def make_playlists(Session):
+def make_playlists(Session, choices, recency):
     session = Session()
-    a = session.query(band.source).distinct()
-    print ('Number of playlists to make: {0}'.format(a.count()))
-    for i in a:
-        playlist_name = i[0]
+    for i in choices:
+        playlist_name = i
         print (playlist_name)
-        tracks = session.query(band).filter(band.source==playlist_name)
+        tracks = session.query(band).filter(band.source == playlist_name)
         print ('{0} tracks found for {1}'.format(tracks.count(), playlist_name))
         print (get_ids(Session, playlist_name))
-        print (send_it(Session, playlist_name, recency=2018))
+        try:
+            send_it(Session, playlist_name, recency=recency)
+        except Exception as e:
+            print (str(e))
+            print ('Playlist failed: {0}'.format(playlist_name))
     return
 
+def top_90(Session):
+    session = Session()
+    playlist_name = 'Scout Top 90'
+    print (playlist_name)
+    tracks = session.query(band).filter(band.appeared == playlist_name)
+    print ('{0} tracks found for {1}'.format(tracks.count(), playlist_name))
+    print (get_ids(Session, playlist_name))
+    send_it_top90(Session, playlist_name, recency=2018)
 
 if __name__ == "__main__":
 

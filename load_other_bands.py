@@ -14,19 +14,29 @@ bandsources = ['KEXP Music That Matters', 'Pitchfork Top Tracks',
                'Stereogum', 'Metacritic', 'KCRW',
                'Pitchfork', 'KEXP charts']
 
-def load_other_bands(Session):
+def load_other_bands(Session, choices):
     # this loop pulls down band names from the sources identified.
     # each source, however, needs its own function, since the
     # websites are set up differently
+
+    proceed = False
+    for src in choices:
+        if src in bandsources:
+            # at least one of the choices needs to be in bandsources
+            # or else this function doesn't need to proceed
+            proceed = True
+    if proceed == False:
+        return
+
     session = Session()
     today = dt.date.today()
-    for src in bandsources:
+    for src in choices:
         print('\n\n\n', src)
         try:
             list = grabbands(src)
         except Exception as e:
             print (str(e))
-            print ('Couldnt do {0}'.format(src))
+            print ('{0} not provided for in load_other_bands.grabbands'.format(src))
             list = []
 
         for i in list:
@@ -46,31 +56,25 @@ def load_other_bands(Session):
                     print(str(e))
 
     cleandb(Session)
-    a = shredTTOTMs(Session)
-    print(('Deleted {0} TTOTM bands'.format(a)))
     return
 
 def grabbands(src):
-    maxbands = 75
     if src == 'Pitchfork':
-        list = Pitchfork_charts(maxbands)
+        list = Pitchfork_charts(25)
     if src == 'KEXP charts':
-        maxbands = 150
-        list = KEXP_charts(maxbands)
+        list = KEXP_charts(150)
     if src == 'KCRW':
-        list = KCRW_harvest(maxbands)
-    if src == 'KEXP playlists':
-        list = KEXP_harvest(maxbands)
+        list = KCRW_harvest(200)
     if src == 'Metacritic':
         try:
-            list = metacritic(maxbands)
+            list = metacritic(75)
         except Exception as e:
             list = []
             print (str(e))
             pass
     if src == 'Stereogum':
         try:
-            list = sgum(maxbands)
+            list = sgum(25)
         except Exception as e:
             list = []
             print (str(e))

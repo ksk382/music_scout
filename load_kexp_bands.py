@@ -23,7 +23,7 @@ def add_to_db(Session, k):
                   dateplayed=line[5],
                   dateadded=t,
                   cleanname=clean_name)
-        q = session.query(band).filter(band.name == n_.name, band.song == n_.song)
+        q = session.query(band).filter(band.name == n_.name, band.song == n_.song, band.source == n_.source)
         if q.first() == None:
             session.add(n_)
             adds += 1
@@ -38,24 +38,26 @@ def add_to_db(Session, k):
     return
 
 
-def load_kexp_bands(Session):
+def load_kexp_bands(Session, choices):
 
     shows = {
         'Swingin Doors': {'day': '3', 'time': '18:00', 'duration': 3},
         'Roadhouse': {'day': '2', 'time': '18:00', 'duration': 3},
-        'DJ Riz': {'day': '0', 'time': '21:00', 'duration': 3},
-        'Street Sounds': {'day': '6', 'time': '18:00', 'duration': 3},
+        'Expansions': {'day': '6', 'time': '21:00', 'duration': 3},
+        'Street Sounds': {'day': '4', 'time': '21:00', 'duration': 3},
         'El Toro': {'day': '2', 'time': '21:00', 'duration': 3},
         'Jazz Theater': {'day': '0', 'time': '01:00', 'duration': 2},
         'Sonic Reducer': {'day': '5', 'time': '21:00', 'duration': 3},
-        'Troy Nelson': {'day': '5', 'time': '15:00', 'duration': 3}
+        'Troy Nelson': {'day': '5', 'time': '15:00', 'duration': 3},
+        'Sunday Soul': {'day': '6', 'time': '18:00', 'duration': 3}
     }
 
     for show in shows:
-        target = shows[show]
-        showname = show
-        k = KEXPharvest(target, showname, max_length=800)
-        add_to_db(Session, k)
+        if show in choices:
+            target = shows[show]
+            showname = show
+            k = KEXPharvest(target, showname, max_length=800)
+            add_to_db(Session, k)
 
     return
 
@@ -71,4 +73,4 @@ if __name__ == "__main__":
     metadata = MetaData(db)
     db.metadata.create_all(engine)
 
-    load_kexp_bands(Session)
+    load_kexp_bands(Session, ['Sunday Soul', 'Expansions', 'Street Sounds'])

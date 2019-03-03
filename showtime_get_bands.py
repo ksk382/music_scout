@@ -296,9 +296,10 @@ def KCRW_harvest(maxbands):
         for entry in data:
             bandname = entry["artist"]
             trackname = entry['title']
-            if bandname != "[BREAK]":
-                newband = band(name=bandname, song=trackname, appeared = 'KCRW')
-                allbands.append(newband)
+            if entry["program_title"] == "Morning Becomes Eclectic":
+                if bandname != "[BREAK]":
+                    newband = band(name=bandname, song=trackname, appeared = 'KCRW Eclectic')
+                    allbands.append(newband)
         i+=1
 
     for j in allbands:
@@ -306,6 +307,39 @@ def KCRW_harvest(maxbands):
             c.append(j)
 
     return c[:maxbands]
+
+def get_jukebox_bangers():
+    url = 'http://www.thesinglesjukebox.com/?p=25856'
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = urllib.request.Request(url, headers=hdr)
+    page = urllib.request.urlopen(req)
+    bs = BeautifulSoup(page, "html.parser")
+
+    a = bs.find('li', {'id': 'linkcat-215'})
+    print (a.text)
+    b = a.findAll('a')
+    links = []
+    for i in b:
+        print (i.text)
+        print (i['href'])
+        links.append (i['href'])
+
+    adds = []
+    for link in links:
+        url = link
+        req = urllib.request.Request(url, headers=hdr)
+        page = urllib.request.urlopen(req)
+        bs = BeautifulSoup(page, "html.parser")
+        c = bs.find('div', {'class': 'post'})
+        d = c.find('h2')
+        e = d.text.split('–')
+        artist = e[0].strip()
+        song = e[1].strip()
+        print (artist, song)
+        newband = band(name=artist, appeared='Singles Jukebox 2018 Bangers', song = song, )
+        adds.append(newband)
+
+    return adds
 
 if __name__ == "__main__":
 

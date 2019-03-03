@@ -1,6 +1,19 @@
 import urllib.request, json, getopt
 import datetime as dt
 from pytz import timezone
+import pickle
+import socket
+from sqlalchemy import MetaData
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+from build_database import db, band
+import urllib.request, json, getopt
+from bs4 import BeautifulSoup
+from build_database import band
+import random
+from random import shuffle
+from utilities import cleanup
+
 
 def KEXPharvest(show, showname, max_length):
 
@@ -87,3 +100,130 @@ def KEXPharvest(show, showname, max_length):
         if t1 not in k:
             k.append(t1)
     return k
+
+def countdown():
+    site = 'https://www.kexp.org/read/?category=2018-countdown'
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = urllib.request.Request(site, headers=hdr)
+    page = urllib.request.urlopen(req)
+    bs = BeautifulSoup(page, "html.parser")
+
+    pointers = []
+    morepages = True
+    while morepages:
+        req = urllib.request.Request(site, headers=hdr)
+        page = urllib.request.urlopen(req)
+        bs = BeautifulSoup(page, "html.parser")
+        a = bs.find('div', {'class': 'u-grid-col u-grid-md-col9 u-md-pr3'})
+        links = a.findChildren('a')
+        morepages = False
+        for i in links:
+            x = i.text.strip()
+            if x.startswith('2018 Top'):
+                print (x)
+                y = 'https://www.kexp.org' + i['href']
+                if y not in pointers:
+                    pointers.append(y) #..get_attribute('href')
+                    morepages = True
+        print ('\n\n')
+        b = bs.findAll('a', {'class':'RoundedButton'})
+        for i in b:
+            if i.text.strip().startswith('View'):
+                site = 'https://www.kexp.org/read/' + i['href']
+                print (site)
+        print ('\n\n')
+        print (pointers)
+
+    with open('2018_top_ten_links.pickle', 'wb') as handle:
+        pickle.dump(pointers, handle)
+    print ('Done pickling')
+
+    return
+
+def grablist(i):
+    basesite = i
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = urllib.request.Request(basesite, headers=hdr)
+    page = urllib.request.urlopen(req)
+    bs = BeautifulSoup(page, "html.parser")
+    t = bs.find('tbody')
+    s = t.findAll('tr')
+    albumlist = []
+    m = 0
+    n = 0
+    for i in s:
+        x = i.text.splitlines()
+        if x[1].isdigit():
+            m +=1
+        else:
+            n +=1
+    if m > n:
+        a = 2
+        b = 3
+    else:
+        a = 1
+        b = 2
+    for i in s:
+        x = i.text.splitlines()
+        artist = x[a]
+        album = x[b]
+        print (artist, album)
+        albumlist.append([artist, album])
+    return albumlist
+
+def grab_all_lists():
+    albumlist = []
+    for i in b:
+        a = grablist(i)
+        for j in a:
+            if j not in albumlist:
+                albumlist.append(j)
+    print (albumlist)
+    with open('2018_top_ten_albumlist.pickle', 'wb') as handle:
+        pickle.dump(albumlist, handle)
+
+
+def load_to_db(albumlist):
+    socket.setdefaulttimeout(15)
+    # creation of the SQL database and the "session" object that is used to manage
+    # communications with the database
+    engine = create_engine('sqlite:///../databases/scout.db')
+    session_factory = sessionmaker(bind=engine)
+    Session = scoped_session(session_factory)
+    metadata = MetaData(db)
+    db.metadata.create_all(engine)
+
+    session = Session()
+
+    t = dt.date.today()
+    adds = 0
+
+    for i in albumlist:
+        print (i)
+        clean_name = cleanup(i[0])
+        n_ = band(name=i[0],
+                  album=i[1],
+                  source='KEXP Countdown 2018',
+                  appeared ='KEXP Countdown 2018',
+                  dateadded=t,
+                  cleanname=clean_name)
+        q = session.query(band).filter(band.name == n_.name, band.song == n_.song)
+        if q.first() == None:
+            session.add(n_)
+            adds += 1
+        else:
+            try:
+                print ('Already had {0} - {1}'.format(n_.name, n_.song))
+            except:
+                print ('Already had it. Cannot print. ID is {0}'.format(q.first().id))
+        session.commit()
+    print ('Added {0} songs'.format(adds))
+
+if __name__ == "__main__":
+    #countdown()
+    #grab_all_lists()
+    with open('2018_top_ten_albumlist.pickle', 'rb') as handle:
+        b = pickle.load(handle)
+    print (b)
+    print (len(b))
+    load_to_db(b)

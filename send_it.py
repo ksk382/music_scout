@@ -7,6 +7,7 @@ from build_database import db, band
 from gmusicapi import Mobileclient
 from difflib import SequenceMatcher
 import os
+from random import shuffle
 
 
 def get_creds():
@@ -139,13 +140,13 @@ def get_ids(Session, source):
             i = do_track_query(i)
             session.commit()
             count += 1
-    c_str = 'Found IDs for {0} tracks'.format(count)
+    c_str = 'Pulled IDs for {0} tracks'.format(count)
     return c_str
 
 
 def make_new_playlist(pname):
 
-    playlist_name = pname
+    playlist_name = 'Scout ' + pname
     allcontents = api.get_all_user_playlist_contents()
 
     for i in allcontents:
@@ -156,23 +157,39 @@ def make_new_playlist(pname):
 
     print('Creating playlist {0}'.format(playlist_name))
     playlist_id = api.create_playlist(playlist_name, description=None, public=False)
-    print('Playlist ID: {0}'.format(playlist_id))
+    #print('Playlist ID: {0}'.format(playlist_id))
 
     return playlist_id
 
 
 def send_it(Session, source, recency):
     session = Session()
-    tracks = session.query(band).filter(band.source == source)
+    tracks = session.query(band).filter(band.source == source).order_by(band.dateadded.desc())
     idlist = []
     for i in tracks:
         if i.storeID is not None and i.storeID != 'failed' and i.storeID != 'album':
             if int(i.storeID_year) >= int(recency):
                 idlist.append(i.storeID)
+    if len(idlist) > 999:
+        idlist = idlist[:999]
+        shuffle(idlist)
     playlist_id = make_new_playlist(source)
     api.add_songs_to_playlist(playlist_id, idlist[:800])
+    print ('Added {0} songs to playlist'.format(len(idlist[:800])))
     return
 
+def send_it_top90(Session, appeared, recency):
+    session = Session()
+    tracks = session.query(band).filter(band.appeared == appeared)
+    idlist = []
+    for i in tracks:
+        if i.storeID is not None and i.storeID != 'failed' and i.storeID != 'album':
+            if int(i.storeID_year) >= int(recency):
+                idlist.append(i.storeID)
+    playlist_id = make_new_playlist(appeared)
+    api.add_songs_to_playlist(playlist_id, idlist[:800])
+    print ('Added {0} songs to playlist {1}'.format(len(idlist[:800]), appeared))
+    return
 
 if __name__ == "__main__":
 
@@ -193,5 +210,4 @@ if __name__ == "__main__":
 
     source = 'KEXP charts'
 
-    #get_ids(Session, source)
-    #send_it(Session, source, recency=2018)
+    send_it(Session, source, recency=2018)
