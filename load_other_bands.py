@@ -27,7 +27,6 @@ def load_other_bands(Session, choices):
             proceed = True
     if proceed == False:
         return
-
     session = Session()
     today = dt.date.today()
     for src in choices:
@@ -35,10 +34,9 @@ def load_other_bands(Session, choices):
         try:
             list = grabbands(src)
         except Exception as e:
-            print (str(e))
             print ('{0} not provided for in load_other_bands.grabbands'.format(src))
-            list = []
-
+            print (str(e))
+        add_count = 0
         for i in list:
             h = cleanup(i.name)
             if h != '':
@@ -52,9 +50,10 @@ def load_other_bands(Session, choices):
                         print("Adding {0} (from {1})".format(i.name, i.source))
                         session.add(i)
                         session.commit()
+                        add_count+=1
                 except Exception as e:
                     print(str(e))
-
+        print ('Added {0} entries to the {1} collection. \n\n'.format(add_count, src))
     cleandb(Session)
     return
 

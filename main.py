@@ -53,23 +53,25 @@ def get_choices():
 
     return a
 
-
-
 if __name__ == "__main__":
 
     choices = get_choices()
     recency = input('\n\nEnter oldest year to include: \n')
     try:
+        print ('\n\n\nload_other_bands\n\n')
         load_other_bands(Session, choices)
         pass
     except:
         pass
     try:
+        print ('\n\n\nload_kexp_bands\n\n')
         load_kexp_bands(Session, choices)
         pass
     except:
         pass
     a = shredTTOTMs(Session)
     print ('Deleted {0} TTOTM bands'.format(a))
+    print ('\n\n\n\n\nMaking playlists')
     make_playlists(Session, choices, recency=recency)
     #top_90(Session)
+

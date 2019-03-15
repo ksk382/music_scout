@@ -77,6 +77,7 @@ def get_credentials():
 
 
 def sheetpull():
+    print ('\n\nPulling from TTOTM Master List')
     credentials = get_credentials()
     print ('Credential get: ', credentials)
     http = credentials.authorize(httplib2.Http())

@@ -33,9 +33,8 @@ def add_to_db(Session, k):
             except:
                 print ('Already had it. Cannot print. ID is {0}'.format(q.first().id))
         session.commit()
-    print ('Added {0} songs'.format(adds))
 
-    return
+    return adds
 
 
 def load_kexp_bands(Session, choices):
@@ -57,8 +56,9 @@ def load_kexp_bands(Session, choices):
             target = shows[show]
             showname = show
             k = KEXPharvest(target, showname, max_length=800)
-            add_to_db(Session, k)
-
+            count = add_to_db(Session, k)
+            print ('Added {0} songs to {1}'.format(count, showname))
+    print ('Done with load_kexp_bands\n\n')
     return
 
 
