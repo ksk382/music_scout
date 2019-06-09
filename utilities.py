@@ -7,17 +7,19 @@ from build_database import gig, band
 
 def cleandb(Session):
     session = Session()
-    # kill of shows that have passed or are not within 60 days
-    allshows = session.query(gig).order_by(gig.date.asc())
-    today = dt.datetime.today()
-    tdelta = 60
-    twomonths = today + dt.timedelta(tdelta)
-    for show in allshows:
-        a = dt.datetime.strptime(show.date, '%Y-%m-%d')
-        if (a < today) or (a > twomonths):
-            session.delete(show)
-            session.commit()
-    return
+    # delete repeats of storeID
+    all_songs = session.query(band).order_by(band.id.desc())
+    j = []
+    k = []
+    for i in all_songs:
+        if i.storeID not in j:
+            j.append(i.storeID)
+        elif i.storeID != 'failed' and i.storeID != 'album' and i.storeID is not None:
+            k.append(i.storeID)
+            session.delete(i)
+    session.commit()
+
+    return len(k)
 
 def shredTTOTMs(Session):
     TTOTMlist = sheetpull()

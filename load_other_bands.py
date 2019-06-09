@@ -28,6 +28,7 @@ def load_other_bands(Session, choices):
     if proceed == False:
         return
     session = Session()
+    cleandb(Session)
     today = dt.date.today()
     for src in choices:
         print('\n\n\n', src)
@@ -46,7 +47,6 @@ def load_other_bands(Session, choices):
                         i.source = src
                         i.cleanname = h
                         i.dateadded = today
-                        #newband = i(name=i, source=src, cleanname=h, dateadded=today)
                         print("Adding {0} (from {1})".format(i.name, i.source))
                         session.add(i)
                         session.commit()
@@ -63,7 +63,7 @@ def grabbands(src):
     if src == 'KEXP charts':
         list = KEXP_charts(150)
     if src == 'KCRW':
-        list = KCRW_harvest(200)
+        list = KCRW_harvest(300)
     if src == 'Metacritic':
         try:
             list = metacritic(75)

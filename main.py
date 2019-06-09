@@ -6,7 +6,7 @@ from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from build_database import db, band
-from utilities import shredTTOTMs, cleanup
+from utilities import shredTTOTMs, cleandb
 from load_kexp_bands import load_kexp_bands
 from load_other_bands import load_other_bands
 from make_playlists import make_playlists, top_90
@@ -71,7 +71,10 @@ if __name__ == "__main__":
         pass
     a = shredTTOTMs(Session)
     print ('Deleted {0} TTOTM bands'.format(a))
+    b = cleandb(Session)
+    print ('Deleted {0} repeat tracks'.format(b))
     print ('\n\n\n\n\nMaking playlists')
     make_playlists(Session, choices, recency=recency)
     #top_90(Session)
+
 
