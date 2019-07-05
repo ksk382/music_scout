@@ -177,7 +177,6 @@ def metacritic(maxbands):
 
     return c[:maxbands]
 
-
 def sgum(maxbands):
 
     socket.setdefaulttimeout(10)
@@ -299,6 +298,10 @@ def KCRW_harvest(maxbands):
             if entry["program_title"] == "Morning Becomes Eclectic":
                 if bandname != "[BREAK]":
                     newband = band(name=bandname, song=trackname, appeared = 'KCRW Eclectic')
+                    allbands.append(newband)
+            else:
+                if bandname != "[BREAK]":
+                    newband = band(name=bandname, song=trackname, appeared = 'not KCRW Eclectic')
                     allbands.append(newband)
         i+=1
 
