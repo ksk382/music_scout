@@ -14,7 +14,7 @@ from make_playlists import make_playlists, top_90
 socket.setdefaulttimeout(10)
 # creation of the SQL database and the "session" object that is used to manage
 # communications with the database
-engine = create_engine('sqlite:///../databases/scout.db')
+engine = create_engine('sqlite:///../'sqlite:///../../databases/scout.db')
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
 
