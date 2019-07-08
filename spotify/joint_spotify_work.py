@@ -48,6 +48,15 @@ def find_spotify_ids(Session):
                             (band.spotify_id == None),
                             (band.spotify_id == 'failed 1'))).filter(band.song != None)
     sp, username = splog_on()
+    print ('Searching for spotify_ids for {} songs in the DB'.format(a.count()))
+    for h in a:
+        try:
+            print (h.name, h.source)
+        except:
+            print (h)
+            input('stopped here')
+    print ('\n\n')
+    sp, username = splog_on()
     count = 0
     barmax = a.count()
     tracksuccesses = []
@@ -61,28 +70,37 @@ def find_spotify_ids(Session):
             else:
                 fail_count = 0
             id = None
-            query = 'artist:{0} track:{1}'.format(artist, song)
-            results = sp.search(q=query, type='track')
+
+            query1 = 'artist:{0} track:{1}'.format(artist, song)
+            results = sp.search(q=query1, type='track')
             if results['tracks']['total'] == 0:
-                query = '{0} {1}'.format(artist, song)
-                results = sp.search(q=query, type='track')
+                query2 = '{0} {1}'.format(artist, song)
+                results = sp.search(q=query2, type='track')
+            if results['tracks']['total'] == 0:
+                query3 = '{0} {1}'.format(artist, song.split('(')[0])
+                results = sp.search(q=query3, type='track')
+            if results['tracks']['total'] == 0:
+                query4 = '{0} {1}'.format(artist.split('feat.')[0], song.split('(')[0])
+                results = sp.search(q=query4, type='track')
+
             items = results['tracks']['items']
             h = 0
             for item in items:
                 if item['popularity'] > h:
                     h = item['popularity']
                     id = item['id']
+                    i.spotify_release_year = item['album']['release_date']
             if id is not None:
                 i.spotify_id = id
-                print ('Spotify found:  {} - {}'.format(artist, song))
-                tracksuccesses.append([artist, song])
+                print ('Spotify found:  {} - {} - {}    '
+                       '{}'.format(i.source, artist, song, i.spotify_release_year))
+                tracksuccesses.append([i.source, artist, song])
             else:
-                print ('Spotify failed: {} - {}'.format(artist, song))
-                trackfails.append([artist, song])
+                trackfails.append([i.source, query2])
                 new_id = 'failed {}'.format(fail_count + 1)
                 i.spotify_id = new_id
             session.commit()
-            count +=1
+            count += 1
             bar.update(count)
     print ('Track successes:  {0}     Track fails:      {1}'.format(len(tracksuccesses), len(trackfails)))
     return
