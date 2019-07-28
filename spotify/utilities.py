@@ -6,12 +6,19 @@ from gsheetpull import sheetpull
 from joint_build_database_new import band
 
 def cleandb(Session):
+    shredTTOTMs(Session)
     session = Session()
     # delete repeats of storeID
     all_songs = session.query(band).order_by(band.id.desc())
     j = []
     k = []
+    c = 0
     for i in all_songs:
+        c +=1
+        if i == None:
+            print (c)
+            input('nonetype here')
+            continue
         if i.spotify_id not in j:
             j.append(i.spotify_id)
         elif i.spotify_id != 'failed' and i.spotify_id != 'album' and i.spotify_id is not None:
@@ -28,14 +35,10 @@ def shredTTOTMs(Session):
     for tband in TTOTMlist:
         name = cleanup(tband[0])
         bands = session.query(band).filter(band.cleanname == name)
-        gigs = session.query(gig).filter(gig.cleanname == name)
         for i in bands:
             session.delete(i)
             session.commit()
             delete_count += 1
-        for i in gigs:
-            session.delete(i)
-            session.commit()
     return delete_count
 
 def cleanup(name):

@@ -30,7 +30,11 @@ def load_other_bands(Session, choices):
     session = Session()
     cleandb(Session)
     today = dt.date.today()
-    for src in choices:
+    other_sources = ['KEXP Music That Matters', 'Pitchfork Top Tracks',
+                     'Stereogum', 'Metacritic', 'KCRW',
+                     'Pitchfork', 'KEXP charts']
+    other_choices = [x for x in choices if x in other_sources]
+    for src in other_choices:
         print('\n\n\n', src)
         try:
             list = grabbands(src)

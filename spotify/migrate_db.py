@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from joint_build_database_old import db as db1, band as band1
 from joint_build_database_new import db as db2, band as band2
 import pandas as pd
+from sqlalchemy.orm.session import make_transient
 
 
 socket.setdefaulttimeout(10)
@@ -25,21 +26,32 @@ metadata = MetaData(db2)
 db2.metadata.create_all(engine)
 sess2 = Session()
 
+a = sess1.query(band1)
+print (a.count())
 
-df1 = pd.read_sql(sess1.query(band1).statement, sess1.bind)
+for i in a:
+    n = band2(
+        name = i.name,
+        song = i.song,
+        album = i.album,
+        appeared = i.appeared,
+        release_year = i.release_year,
+        comment = i.comment,
+        source = i.source,
+        cleanname = i.cleanname,
+        dateadded = i.dateadded,
+        dateplayed = i.dateplayed,
+        google_nid = i.google_nid,
+        google_storeID = i.google_storeID,
+        spotify_id = i.spotify_id,
+        spotify_release_date = i.spotify_release_year,
+        found_by_album = i.found_by_album,
+        got_rest_of_album = i.got_rest_of_album,
 
-df2 = df1
-df2['spotify_release_date'] = df1['spotify_release_year']
+    )
+    sess2.add(n)
 
-print (df2.columns)
-df2 = df2[[]]
-print (df2.columns)
-input('enter to sql?')
-
-df2.to_sql('band', con=engine, index = False, if_exists='replace')
 sess2.commit()
-
-
 
 
 

@@ -19,21 +19,13 @@ metadata = MetaData(db)
 db.metadata.create_all(engine)
 
 session = Session()
-a = session.query(band).filter(band.spotify_release_year == '')
-print (a.count())
 
-count = 0
-barmax = a.count()
+
+
 sp, username = splog_on()
-with progressbar.ProgressBar(max_value=barmax, redirect_stdout=True) as bar:
-    for i in a:
-        if i.spotify_id is None:
-            print ('none')
-        else:
-            if len(i.spotify_id) == 22:
-                i = track_info(i, sp)
-                print (i.spotify_release_year)
-                session.commit()
-        count +=1
-        bar.update(count)
+current_playlists = sp.user_playlists(username)
+for playlist in current_playlists['items']:
+    link = playlist['external_urls']['spotify']
+    if 'Scout' in playlist['name']:
+        print (playlist['name'], link)
 

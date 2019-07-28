@@ -7,6 +7,7 @@ from pprint import pprint
 from joint_build_database_new import band
 import progressbar
 from sqlalchemy import or_
+from utilities import cleandb
 
 def load_config():
     global user_config
@@ -34,11 +35,66 @@ def splog_on():
         print ("Can't get token for", user_config['username'])
     return sp, username
 
-def track_info(i, sp):
-    a = sp.track(i.spotify_id)
-    #pprint (a)
-    #print (a['album']['release_date'])
-    i.spotify_release_year = a['album']['release_date']
+def fill_in_release_dates(Session, **kwargs):
+    session = Session()
+    if 'sp' in kwargs.keys():
+        sp = kwargs['sp']
+    else:
+        sp, username = splog_on()
+    if 'i' not in kwargs.keys():
+        a = session.query(band).filter(band.spotify_id != None).filter(band.spotify_release_date == None)
+        print (a.count())
+        for i in a:
+            i = track_info(i, sp=sp)
+            session.commit()
+    else:
+        i = kwargs['i']
+        i = track_info(i, sp=sp)
+        print (i.name, i.spotify_id, i.spotify_release_date)
+        session.commit()
+
+def track_info(i, **kwargs):
+    if 'sp' in kwargs.keys():
+        sp = kwargs['sp']
+    else:
+        sp, username = splog_on()
+
+    print (i.spotify_id)
+    if len(i.spotify_id)!=22:
+        print ('not a valid id')
+        artist = i.name
+        song = i.song
+        id = None
+
+        query1 = 'artist:{0} track:{1}'.format(artist, song)
+        results = sp.search(q=query1, type='track')
+        if results['tracks']['total'] == 0:
+            query2 = '{0} {1}'.format(artist, song)
+            results = sp.search(q=query2, type='track')
+        if results['tracks']['total'] == 0:
+            query3 = '{0} {1}'.format(artist, song.split('(')[0])
+            results = sp.search(q=query3, type='track')
+        if results['tracks']['total'] == 0:
+            query4 = '{0} {1}'.format(artist.split('feat.')[0], song.split('(')[0])
+            results = sp.search(q=query4, type='track')
+
+        items = results['tracks']['items']
+        h = 0
+        for item in items:
+            if item['popularity'] > h:
+                h = item['popularity']
+                id = item['id']
+                i.spotify_release_year = item['album']['release_date']
+        if id is not None:
+            i.spotify_id = id
+            print ('Spotify found:  {} - {} - {}    '
+                   '{}'.format(i.source, artist, song, i.spotify_release_date))
+        else:
+            print ('Query result id is None')
+    else:
+        a = sp.track(i.spotify_id)
+        i.spotify_release_date = a['album']['release_date']
+
     return i
 
 def find_spotify_ids(Session):
@@ -89,11 +145,11 @@ def find_spotify_ids(Session):
                 if item['popularity'] > h:
                     h = item['popularity']
                     id = item['id']
-                    i.spotify_release_year = item['album']['release_date']
+                    i.spotify_release_date = item['album']['release_date']
             if id is not None:
                 i.spotify_id = id
                 print ('Spotify found:  {} - {} - {}    '
-                       '{}'.format(i.source, artist, song, i.spotify_release_year))
+                       '{}'.format(i.source, artist, song, i.spotify_release_date))
                 tracksuccesses.append([i.source, artist, song])
             else:
                 trackfails.append([i.source, query2])
@@ -105,74 +161,67 @@ def find_spotify_ids(Session):
     print ('Track successes:  {0}     Track fails:      {1}'.format(len(tracksuccesses), len(trackfails)))
     return
 
-def find_spotify_ids_choices(Session, choices):
+def find_spotify_ids_choices(Session, a):
     print ('Obtaining spotify_ids')
     session = Session()
-    print (choices)
-    for choice in choices:
-        a = session.query(band).filter(or_(
-                            (band.spotify_id == None),
-                            (band.spotify_id == 'failed 1')))\
-                            .filter(band.song != None).filter(band.source==choice)
+    print ('Searching for spotify_ids for {} songs in the DB'.format(a.count()))
+    for h in a:
+        try:
+            print (h.name, h.source)
+        except:
+            print (h)
+            input('stopped here')
+    print ('\n\n')
+    sp, username = splog_on()
+    count = 0
+    barmax = a.count()
+    tracksuccesses = []
+    trackfails = []
+    with progressbar.ProgressBar(max_value=barmax, redirect_stdout=True) as bar:
+        for i in a:
+            artist = i.name
+            song = i.song
+            if i.spotify_id == 'failed 1':
+                fail_count = 1
+            else:
+                fail_count = 0
+            id = None
 
-        print ('Searching for spotify_ids for {} songs in the DB'.format(a.count()))
-        for h in a:
-            try:
-                print (h.name, h.source)
-            except:
-                print (h)
-                input('stopped here')
-        print ('\n\n')
-        sp, username = splog_on()
-        count = 0
-        barmax = a.count()
-        tracksuccesses = []
-        trackfails = []
-        with progressbar.ProgressBar(max_value=barmax, redirect_stdout=True) as bar:
-            for i in a:
-                artist = i.name
-                song = i.song
-                if i.spotify_id == 'failed 1':
-                    fail_count = 1
-                else:
-                    fail_count = 0
-                id = None
+            query1 = 'artist:{0} track:{1}'.format(artist, song)
+            results = sp.search(q=query1, type='track')
+            if results['tracks']['total'] == 0:
+                query2 = '{0} {1}'.format(artist, song)
+                results = sp.search(q=query2, type='track')
+            if results['tracks']['total'] == 0:
+                query3 = '{0} {1}'.format(artist, song.split('(')[0])
+                results = sp.search(q=query3, type='track')
+            if results['tracks']['total'] == 0:
+                query4 = '{0} {1}'.format(artist.split('feat.')[0], song.split('(')[0])
+                results = sp.search(q=query4, type='track')
 
-                query1 = 'artist:{0} track:{1}'.format(artist, song)
-                results = sp.search(q=query1, type='track')
-                if results['tracks']['total'] == 0:
-                    query2 = '{0} {1}'.format(artist, song)
-                    results = sp.search(q=query2, type='track')
-                if results['tracks']['total'] == 0:
-                    query3 = '{0} {1}'.format(artist, song.split('(')[0])
-                    results = sp.search(q=query3, type='track')
-                if results['tracks']['total'] == 0:
-                    query4 = '{0} {1}'.format(artist.split('feat.')[0], song.split('(')[0])
-                    results = sp.search(q=query4, type='track')
-
-                items = results['tracks']['items']
-                h = 0
-                for item in items:
-                    if item['popularity'] > h:
-                        h = item['popularity']
-                        id = item['id']
-                        i.spotify_release_year = item['album']['release_date']
-                if id is not None:
-                    i.spotify_id = id
-                    print ('Spotify found:  {} - {} - {}    '
-                           '{}'.format(i.source, artist, song, i.spotify_release_year))
-                    tracksuccesses.append([i.source, artist, song])
-                else:
-                    trackfails.append([i.source, query2])
-                    new_id = 'failed {}'.format(fail_count + 1)
-                    i.spotify_id = new_id
-                session.commit()
-                count +=1
-                bar.update(count)
-        print ('\n\nTrackfails:')
-        for k in trackfails:
-            print (k)
-        print ('Track successes:  {0}     Track fails:      {1}'.format(len(tracksuccesses), len(trackfails)))
+            items = results['tracks']['items']
+            h = 0
+            for item in items:
+                if item['popularity'] > h:
+                    h = item['popularity']
+                    id = item['id']
+                    i.spotify_release_year = item['album']['release_date']
+            if id is not None:
+                i.spotify_id = id
+                print ('Spotify found:  {} - {} - {}    '
+                       '{}'.format(i.source, artist, song, i.spotify_release_date))
+                tracksuccesses.append([i.source, artist, song])
+            else:
+                trackfails.append([i.source, query1])
+                new_id = 'failed {}'.format(fail_count + 1)
+                i.spotify_id = new_id
+            session.commit()
+            count +=1
+            bar.update(count)
+    print ('\n\nTrackfails:')
+    for k in trackfails:
+        print (k)
+    print ('Track successes:  {0}     Track fails:      {1}'.format(len(tracksuccesses), len(trackfails)))
     return
 
 def get_playlist_link(new_playlist_name):
@@ -285,6 +334,16 @@ def delete_all_playlists(key_word):
         if key_word in x:
             f = sp.user_playlist_unfollow(username, y)
             print ('deleted {0}'.format(x))
+
+def get_spotify_ids(Session, choices):
+    cleandb(Session)
+    session = Session()
+    for choice in choices:
+        a = session.query(band).filter(or_(
+                            (band.spotify_id == None),
+                            (band.spotify_id == 'failed 1')))\
+                            .filter(band.song != None).filter(band.source==choice)
+        find_spotify_ids_choices(Session, a)
 
 if __name__ == "__main__":
 

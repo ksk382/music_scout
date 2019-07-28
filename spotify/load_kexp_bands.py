@@ -56,9 +56,12 @@ def load_kexp_bands(Session, choices):
         if show in choices:
             target = shows[show]
             showname = show
-            k = KEXPharvest(target, showname, max_length=800)
-            count = add_to_db(Session, k)
-            print ('Added {0} songs to {1}'.format(count, showname))
+            try:
+                k = KEXPharvest(target, showname, max_length=800)
+                count = add_to_db(Session, k)
+                print ('Added {0} songs to {1}'.format(count, showname))
+            except Exception as e:
+                print ('Failed collecting {0} \n {1}'.format(showname, str(e)))
     print ('Done with load_kexp_bands\n\n')
     return
 

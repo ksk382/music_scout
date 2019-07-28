@@ -21,7 +21,7 @@ class band(db):
     google_nid = Column(String(64), index=True)
     google_storeID = Column(String(64), index=True)
     spotify_id = Column(String(64), index=True)
-    spotify_release_date = Column(String(64), index=True)
+    spotify_release_year = Column(String(64), index=True)
     found_by_album = Column(Boolean, index=True)
     got_rest_of_album = Column(Boolean, index= True)
 
