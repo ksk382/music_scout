@@ -300,8 +300,7 @@ def do_a_playlist(track_ids, new_playlist_name):
     delete_list = []
     results = sp.user_playlist(username, playlist_id,
                                fields="tracks,next")
-    tracks = results['tracks']
-    print (tracks)
+
     for i in tracks['items']:
         delete_list.append(i['track']['id'])
     while tracks['next']:

@@ -12,6 +12,8 @@ from get_the_bands import get_the_bands
 from make_spotify_playlists import make_spotify_playlists
 from sqlalchemy import or_
 from utilities import cleandb
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 
 def clear_failed_2s(Session):
 
@@ -38,7 +40,7 @@ if __name__ == '__main__':
     recency = input('\n\nEnter oldest year to include: \n')
 
     # find some bands
-    #get_the_bands(Session, choices)
+    get_the_bands(Session, choices)
 
     # insert album tracks for album listings
     #get_album_tracks(Session)
@@ -47,6 +49,7 @@ if __name__ == '__main__':
     get_spotify_ids(Session, choices)
 
     # make spotify playlists
+    cleandb(Session)
     make_spotify_playlists(Session, choices, recency)
 
 

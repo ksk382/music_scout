@@ -25,8 +25,22 @@ def cleandb(Session):
             k.append(i.spotify_id)
             session.delete(i)
     session.commit()
-
+    delete_christmas_tracks(Session)
     return len(k)
+
+
+def delete_christmas_tracks(Session):
+    #get rid of anything that played in december
+    print ('Deleting any December tracks')
+    session = Session()
+    a = session.query(band)
+    for i in a:
+        if i.dateplayed is not None:
+            b = dt.datetime.strptime(i.dateplayed, '%Y-%m-%d')
+            if b.month == 12:
+                session.delete(i)
+    session.commit()
+
 
 def shredTTOTMs(Session):
     TTOTMlist = sheetpull()
