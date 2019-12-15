@@ -1,5 +1,7 @@
 from send_it import get_creds
 from gmusicapi import Mobileclient
+from pprint import pprint
+import pickle
 
 content = get_creds()
 
@@ -12,8 +14,23 @@ x = 1
 for i in allcontents:
     y.append([x, i['id'], i['name']])
     x += 1
+    if i['name'] == 'May 29, 2018 Dinner Party':
+        pprint (i)
+        x = i['tracks']
+
+a = []
+for j in x:
+    y = [j['track']['artist'], j['track']['title']]
+    a.append(y)
+
+print (a)
+
+with open('../track_dump.pickle', 'wb') as f:
+    pickle.dump(a, f)
 
 choice = 1
+
+'''
 while str(choice) != '0':
     x = 1
     for i in y:
@@ -30,3 +47,4 @@ while str(choice) != '0':
             playlist_id = j[1]
             api.delete_playlist(playlist_id)
             y.remove(j)
+'''

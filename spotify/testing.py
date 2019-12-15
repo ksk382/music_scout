@@ -6,26 +6,73 @@ from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from joint_build_database_new import db, band
-from joint_spotify_work import find_spotify_ids, find_spotify_ids_choices, track_info, splog_on
+from joint_spotify_work import find_spotify_ids_no_db, find_spotify_ids, find_spotify_ids_choices, track_info, splog_on, do_a_playlist
 from get_user_choices import get_user_choices
 from get_the_bands import get_the_bands
 from make_spotify_playlists import make_spotify_playlists
 import progressbar
-
-engine = create_engine('sqlite:///../../databases/scout_new.db')
-session_factory = sessionmaker(bind=engine)
-Session = scoped_session(session_factory)
-metadata = MetaData(db)
-db.metadata.create_all(engine)
-
-session = Session()
+import pickle
+import urllib.request, json, getopt
+from bs4 import BeautifulSoup
 
 
 
-sp, username = splog_on()
-current_playlists = sp.user_playlists(username)
-for playlist in current_playlists['items']:
-    link = playlist['external_urls']['spotify']
-    if 'Scout' in playlist['name']:
-        print (playlist['name'], link)
+def pfork_2019_tracks():
 
+    playlist_name = 'Pitchfork 2019 Review'
+    c = []
+    allbands = []
+    base_site = 'https://pitchfork.com/features/lists-and-guides/best-songs-2019/'
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = urllib.request.Request(base_site, headers=hdr)
+    page = urllib.request.urlopen(req)
+    soup = BeautifulSoup(page, "html.parser")
+    a = soup.findAll("div", {"class": "heading-h3"})
+    a = soup.findAll('h2')
+    for i in a:
+        b = i.text.split(':')
+        artist = b[0].strip().replace('”', '').replace('“', '')
+        song = b[1].strip().replace('”', '').replace('“', '')
+        print (artist, song)
+        c.append(b)
+
+    track_list = c
+    id_list = find_spotify_ids_no_db(track_list)
+    do_a_playlist(id_list, playlist_name)
+
+    return
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+def stereogum_staff_picks_2019():
+
+    c = []
+    playlist_name = 'Stereogum Staff Picks 2019'
+    base_site = 'https://www.stereogum.com/2066366/best-songs-of-2019/franchises/2019-in-review/'
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = urllib.request.Request(base_site, headers=hdr)
+    page = urllib.request.urlopen(req)
+    soup = BeautifulSoup(page, "html.parser")
+    a = soup.findAll('strong')
+    for i in a:
+        j = i.text.split('\n')
+        for k in j:
+            if is_number(k[:2]):
+                m = k[3:]
+                b = m.split('–')
+                artist = b[0].strip().replace('”', '').replace('“', '')
+                song = b[1].strip().replace('”', '').replace('“', '')
+                print (artist, song)
+                c.append(b)
+
+    track_list = c
+    id_list = find_spotify_ids_no_db(track_list)
+    do_a_playlist(id_list, playlist_name)
+
+stereogum_staff_picks_2019()

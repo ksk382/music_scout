@@ -101,7 +101,7 @@ def KEXPharvest(show, showname, max_length):
     return k
 
 def countdown():
-    site = 'https://www.kexp.org/read/?category=2018-countdown'
+    site = 'https://www.kexp.org/read/?category=2019-countdown'
     hdr = {'User-Agent': 'Mozilla/5.0'}
     req = urllib.request.Request(site, headers=hdr)
     page = urllib.request.urlopen(req)
@@ -118,7 +118,7 @@ def countdown():
         morepages = False
         for i in links:
             x = i.text.strip()
-            if x.startswith('2018 Top'):
+            if x.startswith('2019 Top'):
                 print (x)
                 y = 'https://www.kexp.org' + i['href']
                 if y not in pointers:
@@ -133,7 +133,7 @@ def countdown():
         print ('\n\n')
         print (pointers)
 
-    with open('2018_top_ten_links.pickle', 'wb') as handle:
+    with open('2019_top_ten_links.pickle', 'wb') as handle:
         pickle.dump(pointers, handle)
     print ('Done pickling')
 
@@ -170,7 +170,7 @@ def grablist(i):
         albumlist.append([artist, album])
     return albumlist
 
-def grab_all_lists():
+def grab_all_lists(b):
     albumlist = []
     for i in b:
         a = grablist(i)
@@ -178,7 +178,7 @@ def grab_all_lists():
             if j not in albumlist:
                 albumlist.append(j)
     print (albumlist)
-    with open('2018_top_ten_albumlist.pickle', 'wb') as handle:
+    with open('2019_top_ten_albumlist.pickle', 'wb') as handle:
         pickle.dump(albumlist, handle)
 
 
@@ -202,8 +202,8 @@ def load_to_db(albumlist):
         clean_name = cleanup(i[0])
         n_ = band(name=i[0],
                   album=i[1],
-                  source='KEXP Countdown 2018',
-                  appeared ='KEXP Countdown 2018',
+                  source='KEXP Countdown 2019',
+                  appeared ='KEXP Countdown 2019',
                   dateadded=t,
                   cleanname=clean_name)
         q = session.query(band).filter(band.name == n_.name, band.song == n_.song)
@@ -220,9 +220,14 @@ def load_to_db(albumlist):
 
 if __name__ == "__main__":
     #countdown()
-    #grab_all_lists()
-    with open('2018_top_ten_albumlist.pickle', 'rb') as handle:
+
+    with open('2019_top_ten_links.pickle', 'rb') as handle:
+        b = pickle.load(handle)
+    print (b)
+    grab_all_lists(b)
+    with open('2019_top_ten_albumlist.pickle', 'rb') as handle:
         b = pickle.load(handle)
     print (b)
     print (len(b))
+    input ('load_to_db?')
     load_to_db(b)

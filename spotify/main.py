@@ -50,7 +50,9 @@ if __name__ == '__main__':
 
     # make spotify playlists
     cleandb(Session)
-    make_spotify_playlists(Session, choices, recency)
+    errors = make_spotify_playlists(Session, choices, recency)
+    for i in errors:
+        print (i)
 
 
 

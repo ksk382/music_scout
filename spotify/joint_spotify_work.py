@@ -161,6 +161,55 @@ def find_spotify_ids(Session):
     print ('Track successes:  {0}     Track fails:      {1}'.format(len(tracksuccesses), len(trackfails)))
     return
 
+def find_spotify_ids_no_db(track_list):
+    #track_list should be a list of [artist, song]
+    print ('Obtaining spotify_ids')
+    sp, username = splog_on()
+    print ('Searching for spotify_ids for {} songs...'.format(len(track_list)))
+
+
+    count = 0
+    barmax = len(track_list)
+    tracksuccesses = []
+    trackfails = []
+    id_list = []
+    with progressbar.ProgressBar(max_value=barmax, redirect_stdout=True) as bar:
+        for i in track_list:
+            artist = i[0]
+            song = i[1]
+            id = None
+
+            query1 = 'artist:{0} track:{1}'.format(artist, song)
+            results = sp.search(q=query1, type='track')
+            if results['tracks']['total'] == 0:
+                query2 = '{0} {1}'.format(artist, song)
+                results = sp.search(q=query2, type='track')
+            if results['tracks']['total'] == 0:
+                query3 = '{0} {1}'.format(artist, song.split('(')[0])
+                results = sp.search(q=query3, type='track')
+            if results['tracks']['total'] == 0:
+                query4 = '{0} {1}'.format(artist.split('feat.')[0], song.split('(')[0])
+                results = sp.search(q=query4, type='track')
+
+            items = results['tracks']['items']
+            h = 0
+            for item in items:
+                if item['popularity'] > h:
+                    h = item['popularity']
+                    id = item['id']
+            if id is not None:
+                print ('Spotify found:  {} - {}'.format(artist, song))
+                tracksuccesses.append(i)
+                id_list.append(id)
+            else:
+                trackfails.append(i)
+            count += 1
+            bar.update(count)
+    print ('Track successes:  {0}     Track fails:      {1}'.format(len(tracksuccesses), len(trackfails)))
+
+    return id_list
+
+
 def find_spotify_ids_choices(Session, a):
     print ('Obtaining spotify_ids')
     session = Session()
@@ -243,7 +292,7 @@ def check_if_playlist_exists(sp, new_playlist_name,username):
     current_playlist_names = []
     playlist_id = None
     for playlist in current_playlists['items']:
-        print (playlist['name'], playlist['id'])
+        #print (playlist['name'], playlist['id'])
         current_playlist_names.append(playlist['name'])
         if new_playlist_name == playlist['name']:
             playlist_id = playlist['id']
@@ -300,6 +349,7 @@ def do_a_playlist(track_ids, new_playlist_name):
     delete_list = []
     results = sp.user_playlist(username, playlist_id,
                                fields="tracks,next")
+    tracks = results['tracks']
 
     for i in tracks['items']:
         delete_list.append(i['track']['id'])
@@ -308,7 +358,7 @@ def do_a_playlist(track_ids, new_playlist_name):
         for i in tracks['items']:
             delete_list.append(i['track']['id'])
 
-    print ('Deleting: {0}'.format(delete_list))
+    print ('Deleting: {0}'.format(new_playlist_name))
     rounds = len(delete_list) // 99 + 1
     if len(delete_list) > 0:
         for i in range(0, rounds):
