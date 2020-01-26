@@ -75,4 +75,45 @@ def stereogum_staff_picks_2019():
     id_list = find_spotify_ids_no_db(track_list)
     do_a_playlist(id_list, playlist_name)
 
-stereogum_staff_picks_2019()
+
+def dj_alex_year_end():
+    c = []
+    playlist_name = 'Scout DJ Alex Year End'
+    base_site = 'https://kexp.org/read/2019/12/19/2019-top-ten-spotlight-dj-alex/'
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = urllib.request.Request(base_site, headers=hdr)
+    page = urllib.request.urlopen(req)
+    soup = BeautifulSoup(page, "html.parser")
+    a = soup.findAll('b')
+
+    j = []
+    for i in a:
+        if 'SINGLES' in i.text:
+            print (i)
+            x = i
+            while x is not None:
+                x = x.findNext('br')
+                if x is not None:
+                    y = x.nextSibling.strip()
+                    if y is not '':
+                        j.append(y)
+    print (j)
+    print ('\n\n\n')
+    for k in j:
+        # 01. Charli XCX - "Gone (feat. Christine & The Queens)" / "February 2017 (feat. Clairo & Yaeji)" / "Silver
+        if is_number(k[:2]):
+            k = k[3:]
+        b = k.split('-')
+        songs = b[1].split('/')
+        artist = b[0].strip().replace('”', '').replace('“', '').replace('"','')
+        for song in songs:
+            song = song.strip().replace('”', '').replace('“', '').replace('"','')
+            c.append([artist,song])
+            print (f'{artist} - {song}')
+
+    print (c)
+    track_list = c
+    id_list = find_spotify_ids_no_db(track_list)
+    do_a_playlist(id_list, playlist_name)
+
+dj_alex_year_end()
