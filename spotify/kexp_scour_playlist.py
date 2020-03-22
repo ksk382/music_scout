@@ -49,7 +49,10 @@ def KEXPharvest(show, showname, max_length):
         print (url)
         print ('\n')
         try:
-            response = urllib.request.urlopen(url)
+
+            hdr = {'User-Agent': 'Mozilla/5.0'}
+            req = urllib.request.Request(url, headers=hdr)
+            response = urllib.request.urlopen(req)
             data = json.loads(response.read())
             dump = data['results']
             print('Success.\n')
@@ -101,7 +104,7 @@ def KEXPharvest(show, showname, max_length):
     return k
 
 def countdown():
-    site = 'https://www.kexp.org/read/?category=2019-countdown'
+    url = 'https://www.kexp.org/read/?category=2019-countdown'
     hdr = {'User-Agent': 'Mozilla/5.0'}
     req = urllib.request.Request(site, headers=hdr)
     page = urllib.request.urlopen(req)
@@ -110,7 +113,8 @@ def countdown():
     pointers = []
     morepages = True
     while morepages:
-        req = urllib.request.Request(site, headers=hdr)
+        hdr = {'User-Agent': 'Mozilla/5.0'}
+        req = urllib.request.Request(url, headers=hdr)
         page = urllib.request.urlopen(req)
         bs = BeautifulSoup(page, "html.parser")
         a = bs.find('div', {'class': 'u-grid-col u-grid-md-col9 u-md-pr3'})
