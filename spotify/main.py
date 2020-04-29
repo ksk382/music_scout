@@ -6,7 +6,8 @@ from sqlalchemy import MetaData
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from joint_build_database_new import db, band
-from joint_spotify_work import find_spotify_ids, find_spotify_ids_choices, get_spotify_ids
+from joint_spotify_work import find_spotify_ids, \
+    find_spotify_ids_choices, get_spotify_ids, fill_in_release_dates
 from get_user_choices import get_user_choices
 from get_the_bands import get_the_bands
 from make_spotify_playlists import make_spotify_playlists
@@ -50,6 +51,7 @@ if __name__ == '__main__':
 
     # make spotify playlists
     cleandb(Session)
+    fill_in_release_dates(Session)
     errors = make_spotify_playlists(Session, choices, recency)
     for i in errors:
         print (i)

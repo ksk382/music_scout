@@ -5,20 +5,27 @@ def make_spotify_playlists(Session, choices, recency):
     session = Session()
     errors = []
     for i in choices:
-        a = session.query(band).filter(band.source==i).filter(band.spotify_id != None).filter(band.spotify_release_date != None)
+        a = session.query(band).filter(band.source==i).filter(band.spotify_id != None)
         b = []
         a = [x for x in a if len(x.spotify_id) == 22]  # check proper spotify id, length ==22
         too_old = []
         for j in a:
             try:
-                if int(j.spotify_release_date[:4]) >= int(recency):
-                    b.append(j)
+                if j.spotify_release_date != None and j.spotify_release_date != '':
+                    if int(j.spotify_release_date[:4]) >= int(recency):
+                        b.append(j)
+                    elif int(j.spotify_release_date[:4]) < int(recency):
+                        too_old.append(j)
+
                 else:
-                    too_old.append(j)
-                    pass
-                    #print ('no go: ', j.spotify_release_date)
-            except:
-                print ('no go error: ', j.spotify_release_date)
+                    if j.release_year != None and j.spotify_release_date != '':
+                        if int(j.release_year[:4]) >= int(recency):
+                            b.append(j)
+                        else:
+                            too_old.append(j)
+
+            except Exception as e:
+                print (f'no go error: {str(e)}', j.release_year, j.spotify_id)
 
         print ('Creating {} playlist. {} tracks found. {} tracks too old'.format(i, len(b), len(too_old)))
         ids_to_add = [c.spotify_id for c in b]

@@ -1,3 +1,11 @@
+from __future__ import print_function
+import pickle
+import os.path
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
@@ -5,6 +13,7 @@ from oauth2client.file import Storage
 import httplib2
 import os
 import json
+
 
 
 # If modifying these scopes, delete your previously saved credentials
@@ -83,13 +92,24 @@ def sheetpull():
     http = credentials.authorize(httplib2.Http())
     discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
                     'version=v4')
-    service = discovery.build('sheets', 'v4', http=http,
-                              discoveryServiceUrl=discoveryUrl)
+
+    ### added april 2020
+    service = build('sheets', 'v4', credentials=credentials, cache_discovery=False)
+    sheet = service.spreadsheets()
     spreadsheet_id = master_list_sheet
     rangeName = 'A2:C'
+    result = sheet.values().get(spreadsheetId=spreadsheet_id,
+                                range=rangeName).execute()
+    values = result.get('values', [])
+
+    '''
+    ###deleted april 2020
+    service = discovery.build('sheets', 'v4', http=http,
+                              discoveryServiceUrl=discoveryUrl)
+    
     result = service.spreadsheets().values().get \
         (spreadsheetId=spreadsheet_id, range=rangeName).execute()
-    values = result.get('values', [])
+    values = result.get('values', [])'''
     return (values)
 
 

@@ -37,6 +37,7 @@ def splog_on():
 
 def fill_in_release_dates(Session, **kwargs):
     session = Session()
+    counter = 0
     if 'sp' in kwargs.keys():
         sp = kwargs['sp']
     else:
@@ -45,7 +46,9 @@ def fill_in_release_dates(Session, **kwargs):
         a = session.query(band).filter(band.spotify_id != None).filter(band.spotify_release_date == None)
         print (a.count())
         for i in a:
+            counter+=1
             i = track_info(i, sp=sp)
+            print (f'{i.spotify_id} -- {a.count()} remaining')
             session.commit()
     else:
         i = kwargs['i']
@@ -59,7 +62,7 @@ def track_info(i, **kwargs):
     else:
         sp, username = splog_on()
 
-    print (i.spotify_id)
+    #print (i.spotify_id)
     if len(i.spotify_id)!=22:
         print ('not a valid id')
         artist = i.name
@@ -397,5 +400,5 @@ def get_spotify_ids(Session, choices):
 if __name__ == "__main__":
 
     key_word = 'Upcoming'
-    print ("Deleting all playlists with '{0}' in them".format(key_word))
-    delete_all_playlists(key_word)
+    #print ("Deleting all playlists with '{0}' in them".format(key_word))
+    #delete_all_playlists(key_word)
