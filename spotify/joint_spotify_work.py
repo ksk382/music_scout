@@ -24,19 +24,12 @@ def splog_on():
     username = user_config['username']
     print ('\n\n\n')
     print ('Logging in as username: ', user_config['username'])
-    '''
     scope = 'playlist-modify-public,playlist-modify-private,user-library-read'
     token = util.prompt_for_user_token(user_config['username'],
                                        scope=scope,
                                        client_id=user_config['client_id'],
                                        client_secret=user_config['client_secret'],
-                                       redirect_uri=user_config['redirect_uri'])'''
-
-    credentials = oauth2.SpotifyClientCredentials(
-        client_id=user_config['client_id'],
-        client_secret=user_config['client_secret'])
-
-    token = credentials.get_access_token()
+                                       redirect_uri=user_config['redirect_uri'])
 
 
     if token:
