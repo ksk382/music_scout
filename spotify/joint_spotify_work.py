@@ -27,6 +27,7 @@ def splog_on():
     scope = 'playlist-modify-public,playlist-modify-private,user-library-read'
     redirect = user_config['redirect_uri']
     redirect = 'http://localhost:8888/callback/'
+    print (f'redirect: {redirect}')
     token = util.prompt_for_user_token(user_config['username'],
                                        scope=scope,
                                        client_id=user_config['client_id'],

@@ -41,17 +41,17 @@ if __name__ == '__main__':
     recency = input('\n\nEnter oldest year to include: \n')
 
     # find some bands
-    #get_the_bands(Session, choices)
+    get_the_bands(Session, choices)
 
     # insert album tracks for album listings
     #get_album_tracks(Session)
 
     # get the spotify IDs for them
-    #get_spotify_ids(Session, choices)
+    get_spotify_ids(Session, choices)
 
     # make spotify playlists
-    # cleandb(Session)
-    # fill_in_release_dates(Session)
+    cleandb(Session)
+    fill_in_release_dates(Session)
     errors = make_spotify_playlists(Session, choices, recency)
     for i in errors:
         print (i)
