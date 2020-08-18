@@ -40,6 +40,11 @@ if __name__ == '__main__':
     # get user input--which shows to make playlists for
     choices = get_user_choices(Session)
     recency = input('\n\nEnter oldest year to include: \n')
+    ttotm_selection = input('\n\nExclude bands used by TTOTM? (y/n): \n')
+    if ttotm_selection == 'y':
+        remove_TTOTM_tracks = True
+    else:
+        remove_TTOTM_tracks = False
 
     # find some bands
     get_the_bands(Session, choices)
@@ -51,7 +56,7 @@ if __name__ == '__main__':
     get_spotify_ids(Session, choices)
 
     # make spotify playlists
-    cleandb(Session)
+    cleandb(Session, remove_TTOTM_tracks)
     fill_in_release_dates(Session)
     errors = make_spotify_playlists(Session, choices, recency)
     for i in errors:

@@ -5,8 +5,9 @@ import re
 from gsheetpull import sheetpull
 from joint_build_database_new import band
 
-def cleandb(Session):
-    shredTTOTMs(Session)
+def cleandb(Session, remove_TTOTM_tracks):
+    if remove_TTOTM_tracks:
+        shredTTOTMs(Session)
     session = Session()
     # delete repeats of storeID
     all_songs = session.query(band).order_by(band.id.desc())

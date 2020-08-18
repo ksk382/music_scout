@@ -398,7 +398,7 @@ def delete_all_playlists(key_word):
             print ('deleted {0}'.format(x))
 
 def get_spotify_ids(Session, choices):
-    cleandb(Session)
+    cleandb(Session, False)
     session = Session()
     for choice in choices:
         a = session.query(band).filter(or_(
