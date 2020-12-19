@@ -19,7 +19,7 @@ def KEXPharvest(show, showname, max_length):
     today = dt.date.today()
     alltracks = []
 
-    i = 0
+    i = 1
     while len(alltracks) < max_length and i < 20:
 
         showtracks = []
@@ -35,6 +35,7 @@ def KEXPharvest(show, showname, max_length):
         seattletime = ptime.localize(seattletime)
 
         # Convert to UTC
+        # friday night 2020-10-16 at 7:04 pm == 2020-10-17T02:04:10Z
         utc = timezone('UTC')
         starttime = seattletime.astimezone(utc)
 
@@ -45,7 +46,9 @@ def KEXPharvest(show, showname, max_length):
         url = 'https://legacy-api.kexp.org/play/?limit=200&start_time={0}&end_time={1}&ordering=-airdate'.\
             format(startstring, endstring)
         #https://legacy-api.kexp.org/play/?limit=200&start_time=2017-08-10T23:00:00&end_time=2017-08-11T02:00:00&ordering=-airdate
-        print('{3}. {2} playlist: {0} to {1}'.format(startstring, endstring, showname, i))
+        print (f'{i}. {showname} playlist: \n')
+        print (f'{seattletime}   -- {startstring} - {endstring}')
+        #print('{3}. {2} playlist: {0} to {1}'.format(startstring, endstring, showname, i))
         print (url)
         print ('\n')
         try:

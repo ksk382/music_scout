@@ -1,6 +1,6 @@
 from showtime_get_bands import Pitchfork_charts, KCRW_harvest, \
     KEXP_charts, metacritic, sgum, pfork_tracks, \
-    MTM
+    MTM, KNKX
 from utilities import cleandb, cleanup, shredTTOTMs
 import datetime as dt
 import socket
@@ -12,7 +12,7 @@ from utilities import shredTTOTMs, cleanup
 
 bandsources = ['KEXP Music That Matters', 'Pitchfork Top Tracks',
                'Stereogum', 'Metacritic', 'KCRW',
-               'Pitchfork', 'KEXP charts']
+               'Pitchfork', 'KEXP charts', 'KNKX']
 
 def load_other_bands(Session, choices):
     # this loop pulls down band names from the sources identified.
@@ -31,7 +31,7 @@ def load_other_bands(Session, choices):
     today = dt.date.today()
     other_sources = ['KEXP Music That Matters', 'Pitchfork Top Tracks',
                      'Stereogum', 'Metacritic', 'KCRW',
-                     'Pitchfork', 'KEXP charts']
+                     'Pitchfork', 'KEXP charts', 'KNKX']
     other_choices = [x for x in choices if x in other_sources]
     for src in other_choices:
         print('\n\n\n', src)
@@ -66,6 +66,8 @@ def grabbands(src):
         list = KEXP_charts(150)
     if src == 'KCRW':
         list = KCRW_harvest(300)
+    if src == 'KNKX':
+        list = KNKX(2000)
     if src == 'Metacritic':
         try:
             list = metacritic(75)

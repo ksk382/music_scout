@@ -4,6 +4,10 @@ import unicodedata
 import re
 from gsheetpull import sheetpull
 from joint_build_database_new import band
+from sqlalchemy import MetaData
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+from joint_build_database_new import db, band
 
 def cleandb(Session, remove_TTOTM_tracks):
     if remove_TTOTM_tracks:
@@ -83,3 +87,39 @@ def clean_the_tracks(tracks):
             combo.append(a)
         cleantracks.append(combo)
     return cleantracks
+
+def delete_specific_show():
+
+    engine = create_engine('sqlite:///../databases/scout_new.db')
+    session_factory = sessionmaker(bind=engine)
+    Session = scoped_session(session_factory)
+    metadata = MetaData(db)
+    db.metadata.create_all(engine)
+
+    session = Session()
+    a = session.query(band.source).distinct()
+    x = 0
+    shows = []
+    for i in a:
+        x+=1
+        print(f'{x}. - {i[0]}')
+        shows.append([str(x), i[0]])
+    print('Select playlist for deletion: \n')
+    choice = input(': ')
+    print (choice)
+    del_show = ''
+    for i in shows:
+        if i[0] == choice:
+            del_show = i[1]
+    print (f'Deleting {del_show}')
+
+    b = session.query(band).filter(band.source == del_show).all()
+    for i in b:
+        print (i.song, i.source)
+        session.delete(i)
+    session.commit()
+
+
+if __name__ == "__main__":
+    delete_specific_show()
+

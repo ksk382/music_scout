@@ -12,14 +12,17 @@ def get_the_bands(Session, choices):
                     'Jazz Theater',
                     'Sonic Reducer',
                     'Troy Nelson',
-                    'Sunday Soul']
+                    'Sunday Soul',
+                    'Friday Night',
+                    'Pacific Notions',
+                    'Morning Show']
 
     if any(i in kexp_sources for i in choices):
         load_kexp_bands(Session, choices)
 
     other_sources = ['KEXP Music That Matters', 'Pitchfork Top Tracks',
                     'Stereogum', 'Metacritic', 'KCRW',
-                    'Pitchfork', 'KEXP charts']
+                    'Pitchfork', 'KEXP charts', 'KNKX']
 
     if any(i in other_sources for i in choices):
         load_other_bands(Session, choices)

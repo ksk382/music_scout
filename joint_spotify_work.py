@@ -8,8 +8,7 @@ import progressbar
 from sqlalchemy import or_
 from utilities import cleandb
 import spotipy.oauth2 as oauth2
-
-
+import urllib.request, json, getopt
 
 def load_config():
     global user_config
@@ -33,8 +32,6 @@ def splog_on():
                                        client_id=user_config['client_id'],
                                        client_secret=user_config['client_secret'],
                                        redirect_uri=redirect)
-
-
     if token:
         sp = spotipy.Spotify(auth=token)
         print ('Login success')
@@ -97,7 +94,7 @@ def track_info(i, **kwargs):
             if item['popularity'] > h:
                 h = item['popularity']
                 id = item['id']
-                i.spotify_release_year = item['album']['release_date']
+                i.spotify_release_date = item['album']['release_date']
         if id is not None:
             i.spotify_id = id
             print ('Spotify found:  {} - {} - {}    '
@@ -179,8 +176,6 @@ def find_spotify_ids_no_db(track_list):
     print ('Obtaining spotify_ids')
     sp, username = splog_on()
     print ('Searching for spotify_ids for {} songs...'.format(len(track_list)))
-
-
     count = 0
     barmax = len(track_list)
     tracksuccesses = []
@@ -264,10 +259,13 @@ def find_spotify_ids_choices(Session, a):
             items = results['tracks']['items']
             h = 0
             for item in items:
-                if item['popularity'] > h:
-                    h = item['popularity']
-                    id = item['id']
-                    i.spotify_release_year = item['album']['release_date']
+                try:
+                    if item['popularity'] > h:
+                        h = item['popularity']
+                        id = item['id']
+                        i.spotify_release_date = item['album']['release_date']
+                except Exception as e:
+                    print (str(e), artist, song, item)
             if id is not None:
                 i.spotify_id = id
                 print ('Spotify found:  {} - {} - {}    '
@@ -406,6 +404,28 @@ def get_spotify_ids(Session, choices):
                             (band.spotify_id == 'failed 1')))\
                             .filter(band.song != None).filter(band.source==choice)
         find_spotify_ids_choices(Session, a)
+
+def get_spotify_ids_for_album(sp, album):
+    # assumes album is [artist, album]
+    track_ids = []
+    i = album
+    artist = i[0]
+    album = i[1]
+    try:
+        query1 = 'artist:{0} album:{1}'.format(artist, album)
+        results = sp.search(q=query1, type='album')
+        album_id = results['albums']['items'][0]['id']
+        a = sp.album_tracks(album_id)
+        for i in a['items']:
+            name = i['name']
+            track_id = i['id']
+            #print (f'{artist} - {name} - {track_id}')
+            track_ids.append(track_id)
+    except Exception as e:
+        print (str(e))
+        print (f'{album} - {artist}')
+        pass
+    return track_ids
 
 if __name__ == "__main__":
 
