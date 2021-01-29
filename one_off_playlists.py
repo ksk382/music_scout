@@ -359,7 +359,90 @@ def paste_list():
     do_a_playlist(all_tracks, 'Paste top 50')
 
 
+def delete_label(album):
+    a = album
+    print (a)
+    b = a.split('(')[0].strip()
+    print (b)
+    return b
+
+
+def brook_veg():
+
+    with open('bunch_of_albums.txt', 'r') as f:
+        x = f.readlines()
+    albumlist = []
+    for i in x:
+        try:
+            print (i)
+            j = i.split(' - ')
+            artist = j[0].strip()
+            album = j[1].strip()
+            print (f'album: {album} artist: {artist}')
+            album = delete_label(album)
+            print ('\n\n\n\n')
+            albumlist.append([artist,album])
+        except:
+            pass
+    print (albumlist)
+    sp, u = splog_on()
+    track_id_all = []
+    for k in albumlist:
+        print (k)
+        track_ids = get_spotify_ids_for_album(sp, k)
+        track_id_all = track_id_all + track_ids
+    print (f'length of track id all: {len(track_id_all)}')
+    print (track_id_all)
+    do_a_playlist(track_id_all, 'Brooklyn Vegan Rando Top Indie')
+
+def dj_alex():
+    with open('bunch_of_albums.txt', 'r') as f:
+        x = f.readlines()
+    albumlist = []
+    for i in x:
+        try:
+            print (i)
+            j = i.split(' - ')
+            artist = j[0].strip()
+            album = j[1].strip()
+            print (f'album: {album} artist: {artist}')
+            album = delete_label(album)
+            print ('\n\n\n\n')
+            albumlist.append([artist,album])
+        except:
+            pass
+    print (albumlist)
+    sp, u = splog_on()
+    track_id_all = []
+    for k in albumlist:
+        print (k)
+        track_ids = get_spotify_ids_for_album(sp, k)
+        track_id_all = track_id_all + track_ids
+    print (f'length of track id all: {len(track_id_all)}')
+    print (track_id_all)
+    do_a_playlist(track_id_all, 'DJ Alex Year End')
+
+def dj_alex_singles():
+    url = 'https://www.kexp.org/read/2020/12/23/2020-top-ten-list-spotlight-alex-ruder/'
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = urllib.request.Request(url, headers=hdr)
+    page = urllib.request.urlopen(req)
+    bs = BeautifulSoup(page, "html.parser")
+    a = bs.findAll('strong')
+    for i in a:
+        if 'Favorite Singles' in i.text:
+            j = i.parent
+    k = j.text.split('\n')
+    for i in k:
+        if i[:2].isdigit():
+            print (i[4:])
+
+
+
 if __name__ == '__main__':
 
-    make_kexp_countdown_playlists()
+    #make_kexp_countdown_playlists()
     #paste_list()
+    #brook_veg()
+    #dj_alex_singles()
+    list_from_list()
