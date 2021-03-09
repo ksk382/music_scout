@@ -220,6 +220,11 @@ def sgum(maxbands):
         if j not in c:
             c.append(j)
 
+    try:
+        driver.quit()
+    except:
+        pass
+
     return c[:maxbands]
 
 
