@@ -38,23 +38,40 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Description of your program')
     parser.add_argument('-a', '--all',
-                        help='Enter -a yes',
+                        help='To run all shows: -a yes',
+                        required=False)
+    parser.add_argument('-r', '--recency',
+                        help='To run with recency 1900: -r 1900',
+                        required=False)
+    parser.add_argument('-t', '--ttotm',
+                        help='To remove ttotm bands: -t y',
                         required=False)
     args = vars(parser.parse_args())
 
     if args['all'] != None:
         choices = get_all_shows(Session)
-        recency = '1900'
         remove_TTOTM_tracks = False
-
     else:
         choices = get_user_choices(Session)
+    if args['recency'] != None:
+        try:
+            recency = int(args['recency'])
+        except:
+            print ('need a number')
+            recency = input('\n\nEnter oldest year to include: \n')
+    else:
         recency = input('\n\nEnter oldest year to include: \n')
-        ttotm_selection = input('\n\nExclude bands used by TTOTM? (y/n): \n')
-        if ttotm_selection == 'y':
+    if args['ttotm'] != None:
+        if args['ttotm'] == 'y':
             remove_TTOTM_tracks = True
         else:
             remove_TTOTM_tracks = False
+    else:
+        remove_TTOTM_tracks = False
+    print ('\n\n\n')
+    print (f'recency: {recency}')
+    print (f'remove_TTOTM_tracks: {remove_TTOTM_tracks}')
+
 
     #clear_failed_2s(Session)
 
