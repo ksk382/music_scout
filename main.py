@@ -67,7 +67,7 @@ if __name__ == '__main__':
         else:
             remove_TTOTM_tracks = False
     else:
-        remove_TTOTM_tracks = False
+        remove_TTOTM_tracks = True
     print ('\n\n\n')
     print (f'recency: {recency}')
     print (f'remove_TTOTM_tracks: {remove_TTOTM_tracks}')

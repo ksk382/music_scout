@@ -245,16 +245,21 @@ def find_spotify_ids_choices(Session, a):
             id = None
 
             query1 = 'artist:{0} track:{1}'.format(artist, song)
-            results = sp.search(q=query1, type='track')
-            if results['tracks']['total'] == 0:
-                query2 = '{0} {1}'.format(artist, song)
-                results = sp.search(q=query2, type='track')
-            if results['tracks']['total'] == 0:
-                query3 = '{0} {1}'.format(artist, song.split('(')[0])
-                results = sp.search(q=query3, type='track')
-            if results['tracks']['total'] == 0:
-                query4 = '{0} {1}'.format(artist.split('feat.')[0], song.split('(')[0])
-                results = sp.search(q=query4, type='track')
+            try:
+                results = sp.search(q=query1, type='track')
+
+                if results['tracks']['total'] == 0:
+                    query2 = '{0} {1}'.format(artist, song)
+                    results = sp.search(q=query2, type='track')
+                if results['tracks']['total'] == 0:
+                    query3 = '{0} {1}'.format(artist, song.split('(')[0])
+                    results = sp.search(q=query3, type='track')
+                if results['tracks']['total'] == 0:
+                    query4 = '{0} {1}'.format(artist.split('feat.')[0], song.split('(')[0])
+                    results = sp.search(q=query4, type='track')
+            except:
+                print ('failed on results call in joint_spotify_work')
+                continue
 
             items = results['tracks']['items']
             h = 0

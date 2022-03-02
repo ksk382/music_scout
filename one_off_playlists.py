@@ -15,10 +15,10 @@ import os
 
 def pfork_year_end_tracks():
 
-    playlist_name = 'Pitchfork 2020 Review'
+    playlist_name = 'Pitchfork 2021 Review Songs'
     c = []
     allbands = []
-    base_site = 'https://pitchfork.com/features/lists-and-guides/best-songs-2020/'
+    base_site = 'https://pitchfork.com/features/lists-and-guides/best-songs-2021/'
     hdr = {'User-Agent': 'Mozilla/5.0'}
     req = urllib.request.Request(base_site, headers=hdr)
     page = urllib.request.urlopen(req)
@@ -445,4 +445,5 @@ if __name__ == '__main__':
     #paste_list()
     #brook_veg()
     #dj_alex_singles()
-    list_from_list()
+    #list_from_list()
+    pfork_year_end_tracks()

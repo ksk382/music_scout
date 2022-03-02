@@ -193,6 +193,7 @@ def sgum(maxbands):
         prefs = {'profile.managed_default_content_settings.images': 2}
         chromeOptions.add_experimental_option("prefs", prefs)
         driver = webdriver.Chrome(chrome_options=chromeOptions)
+        driver.set_page_load_timeout(15)
         driver.get(url)
 
         innerHTML = driver.execute_script("return document.body.innerHTML")
@@ -200,21 +201,27 @@ def sgum(maxbands):
 
         driver.quit()
 
-        a = bs.find_all('h2')
+        a = bs.find_all('div', class_='article-card article-card-infinite article-card--four-col')
         for i in a:
             if 'Album Of The Week:' in i.text:
-                b = re.sub('Album Of The Week:', '', i.text)
-                c = i.find('em')
-                if c == None:
-                    c = i.find('i')
-                album = c.text.strip()
-                artist = re.sub(album, '', b).strip()
+                d = i.find('p')
+                e = d.text
+                e = re.sub('Album Of The Week:', '', e)
+                try:
+                    album = d.find('em').text.strip()
+                except:
+                    try:
+                        album = d.find('i').text.strip()
+                    except:
+                        continue
+
+                artist = re.sub(album, '' , e).strip()
                 newband = band(name=artist, appeared='Stereogum', album=album)
                 allbands.append(newband)
 
         j+=1
         print ('Found {0} bands so far'.format(len(allbands)))
-
+        
     c = []
     for j in allbands:
         if j not in c:
